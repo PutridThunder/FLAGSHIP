@@ -1,9 +1,9 @@
-# Large language model used to comunicate with the user and the system
-
 import requests
 import json
+
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "qwen3:4b"
+MODEL = "qwen3:1.7b"
+
 
 def ask_llm(prompt):
     response = requests.post(
@@ -11,30 +11,48 @@ def ask_llm(prompt):
         json={
             "model": MODEL,
             "prompt": prompt,
-            "stream": False
+            "stream": False,
+            "think": False
         }
     )
 
     response.raise_for_status()
+
     data = response.json()
 
     return data["response"]
 
 
-if __name__ == "__main__":
-    text = """
-        You are the language model for a personal AI assistant.
+def extract_intent(user_message):
+    prompt = f"""
+    You are the language-processing component of a personal AI assistant.
 
-        Always respond in English unless the user explicitly asks you to use another language.
+    Your job is to analyze the user's message and extract structured information.
 
-        Do not introduce yourself as Qwen.
-        Do not mention Tongyi Lab.
-        Do not describe your general capabilities unless asked.
+    Always return ONLY valid JSON.
+    Do not use markdown.
+    Do not explain your answer.
+    Do not include any text before or after the JSON.
 
-        User:
-        Hello! Who are you?
+    Use these fields:
+
+    - intent: what the user is trying to do
+    - topic: the main topic, or null if there isn't one
+    - goal: what the user wants to accomplish, or null
+    - project: a project mentioned by the user, or null
+    - needs_resources: true if the user would benefit from finding external information, otherwise false
+
+    User message: {user_message}
     """
 
-    answer = ask_llm(text)
-    print(answer)
-print("hello world")
+    response = ask_llm(prompt)
+
+    return json.loads(response)
+
+
+if __name__ == "__main__":
+    message = input("User: ")
+
+    result = extract_intent(message)
+
+    print(json.dumps(result, indent=4))
