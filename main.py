@@ -48,3 +48,5 @@ if user:
             break
 
         print(f"You said: {message}")
+    else:
+        print("User not found.")
