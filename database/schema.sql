@@ -10,3 +10,4 @@ CREATE TABLE users(
 -- users will be in a table as shown
 -- id | first_name | last_name | created_at | updated_at
 --  1 | Sahib      | Bains     | 1:00:02    | 1:00:02
+

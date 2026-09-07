@@ -1,9 +1,26 @@
 import requests
 import json
+import sqlite3
+from datetime import datetime
+
+DATABASE = "data/assistant.db"
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL = "qwen3:1.7b"
 
+def store_memory(user_id, memory):
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+
+    cursor.execute(
+        """
+            INSERT INTO memories (user_id, memory, created_at)
+            VALUES (?, ?, ?)
+        """,
+        (user_id, memory, datetime.now().isoformat())
+    )
+    connection.commit()
+    connection.close()
 
 def ask_llm(prompt):
     response = requests.post(
@@ -146,7 +163,13 @@ def extract_intent(user_message):
 while True:
     if __name__ == "__main__":
         message = input("User: ")
-
+    
         result = extract_intent(message)
 
+        print("\n Structured information:")
         print(json.dumps(result, indent=4))
+
+        if result["intent"] == "store_memory":
+            if result["project"] is not None:
+                store_memory(1, result["project"])
+                print("\n Memory stored.")
