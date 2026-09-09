@@ -22,6 +22,25 @@ def store_memory(user_id, memory):
     connection.commit()
     connection.close()
 
+def retrieve_memories(user_id):
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+
+    cursor.execute(
+        """
+        SELECT memory, created_at
+        FROM memories
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+        """,
+        (user_id,)
+    )
+
+    memories = cursor.fetchall()
+    connection.close()
+
+    return memories
+
 def ask_llm(prompt):
     response = requests.post(
         OLLAMA_URL,
@@ -159,17 +178,27 @@ def extract_intent(user_message):
 
     return json.loads(response)
 
+# while True:
+#     if __name__ == "__main__":
+#         message = input("User: ")
 
-while True:
-    if __name__ == "__main__":
-        message = input("User: ")
-    
-        result = extract_intent(message)
+#         result = extract_intent(message)
 
-        print("\n Structured information:")
-        print(json.dumps(result, indent=4))
+#         print("\nStructured information:")
+#         print(json.dumps(result, indent=4))
 
-        if result["intent"] == "store_memory":
-            if result["project"] is not None:
-                store_memory(1, result["project"])
-                print("\n Memory stored.")
+#         if result["intent"] == "store_memory":
+#             if result["project"] is not None:
+#                 store_memory(1, result["project"])
+#                 print("\nMemory stored.")
+
+#         elif result["intent"] == "retrieve_memory":
+#             memories = retrieve_memories(1)
+
+#             print("\nMemories:")
+
+#             if len(memories) == 0:
+#                 print("No memories found.")
+#             else:
+#                 for memory, created_at in memories:
+#                     print(f"- {memory}")

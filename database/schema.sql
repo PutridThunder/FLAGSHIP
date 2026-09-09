@@ -11,3 +11,10 @@ CREATE TABLE users(
 -- id | first_name | last_name | created_at | updated_at
 --  1 | Sahib      | Bains     | 1:00:02    | 1:00:02
 
+CREATE TABLE IF NOT EXISTS memories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    memory TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
